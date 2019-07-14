@@ -6,6 +6,9 @@
 // 2. scan left to right and find common childs
 // Time complexity = (n log n)
 //
+// Second way:
+// 1. Find the subsequence of first and second string
+// 2. Find the largest common subsequence in both.
 
 import java.io.*;
 import java.util.*;
@@ -14,32 +17,44 @@ public class CommonChild {
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    private static char[] sortString(String s) {
-        char[] c = s.toCharArray();
-        Arrays.sort(c);
-        System.out.println(c);
-        return (c);
-    }
+    private static Set<String> subseq1 = new HashSet<>();
+    private static Set<String> subseq2 = new HashSet<>();
 
-        static int commonChild(String s1, String s2) {
-        char[] sort1 = sortString(s1);
-        char[] sort2 = sortString(s2);
-        int size = s1.length();
-        int count = 0;
+    private static Set<String> subsequence(Set<String> subseq, String s) {
+        for (int pos = 0; pos < s.length(); pos++) {
+            for (int range = s.length(); range > pos; range--) {
 
-        int i = 0;
-        int j = 0;
-        while (size != i && size != j) {
-            System.out.println(sort1[i] + " == " + sort2[j]);
-            if (sort1[i] == sort2[j]) {
-                count++; i++; j++;
-            } else if (sort1[i] < sort2[j]) {
-                i++;
-            } else if (sort1[i] > sort2[j]) {
-                j++;
+                String str = s.substring(pos, range);
+
+                if (!subseq.contains(str))
+                    subseq.add(str);
+
+                for (int drop = 1; drop < str.length(); drop++) {
+                    StringBuffer sb = new StringBuffer(str);
+                    sb.deleteCharAt(drop);
+                    if (!subseq.contains(sb))
+                        subsequence(subseq, sb.toString());
+                }
             }
         }
-        return count;
+
+        return subseq;
+    }
+
+    static int commonChild(String s1, String s2) {
+      Set<String> a1 = subsequence(subseq1, s1);
+      Set<String> a2 = subsequence(subseq2, s2);
+      // System.out.println(a1);
+      // System.out.println(a2);
+
+      int max = 0;
+      for (String s : a1) {
+          if (a2.contains(s) && s.length() > max) {
+              max = s.length();
+              System.out.println(s);
+          }
+      }
+      return max;
     }
 
     public static void main(String[] args) throws IOException {
