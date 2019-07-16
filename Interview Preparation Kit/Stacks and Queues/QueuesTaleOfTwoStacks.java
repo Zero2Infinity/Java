@@ -1,4 +1,5 @@
 // First solution: Simple working but terminated due to timeout.
+// Second solution: Reduce the time complexity of Pop to O(1)
 
 import java.io.*;
 import java.util.*;
@@ -6,36 +7,31 @@ import java.util.*;
 public class QueuesTaleOfTwoStacks {
 
     static class MyQueue<T> {
-        private Stack<T> stack = new Stack<T>();
-        private Stack<T> tmp = new Stack<T>();
+        private Stack<T> s1 = new Stack<T>();
+        private Stack<T> s2 = new Stack<T>();
 
         public void enqueue(T val) {
-            // enqueue
-            if (stack.empty()) {
-                stack.push(val);
-            } else {
-                // dump stack to tmp
-                while ( !stack.empty() ) {
-                    tmp.push(stack.pop());
-                }
-                // insert as first element
-                stack.push(val);
-                // dump tmp to stack
-                while( !tmp.empty() ) {
-                    stack.push(tmp.pop());
-                }
-            }
-            // System.out.println(stack);
+            s1.push(val);
         }
 
         public void dequeue() {
-            // dequeue
-            stack.pop();
+            if (s2.empty()) {
+                while(!s1.empty()) {
+                    s2.push(s1.pop());
+                }
+                s2.pop();
+            } else {
+                s2.pop();
+            }
         }
 
         public T peek() {
-            // peek
-            return stack.peek();
+            if (s2.empty()) {
+                while(!s1.empty()) {
+                    s2.push(s1.pop());
+                }
+            }
+            return s2.peek();
         }
     }
 
