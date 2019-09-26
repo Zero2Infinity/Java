@@ -5,41 +5,73 @@ public class MinMaxRiddle {
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    // Time complexity: O(n^2)
-    // First, build min value per window
-    // Store these information in Map<Long, List<Long>>
-    // Second, find max per window size 
-    // e.g. https://www.hackerrank.com/challenges/min-max-riddle/problem
+    // Time complexity = O(n)
     static long[] riddle(long[] arr) {
-        long[] res = new long[arr.length];
-        Map<Long, List<Long>> table = new LinkedHashMap<>();
+        // Setup left, right, ans, Stack<>
+        int[] left = new int[arr.length];
+        int[] right = new int[arr.length];
+        long[] ans = new long[arr.length + 1];
+        Arrays.fill(left, -1);
+        Arrays.fill(right, arr.length);
+        Arrays.fill(ans, 0);
+
+        Stack<Integer> st = new Stack<>();
+
+        // left[] to store indices of the previous smaller element
         for (int i = 0; i < arr.length; i++) {
-            long minValue = Long.MAX_VALUE;
-            long count = 0;
-            for (int j = i; j < arr.length; j++) {
-                minValue = Math.min(minValue, arr[j]);
-                if (table.containsKey(count)) {
-                    List<Long> newList = new ArrayList<>();
-                    newList.addAll(table.get(count));
-                    newList.add(minValue);
-                    table.put(count, newList);
-                } else {
-                    table.put(count, Arrays.asList(minValue));
-                }
-                count++;
+            while (!st.empty() && arr[st.peek()] >= arr[i]) {
+                st.pop();
             }
+
+            if (!st.empty()) {
+                left[i] = st.peek();
+            }
+
+            st.push(i);
+        }
+        
+        // clean up stack
+        while (!st.empty()) {
+            st.pop();
         }
 
-        int count = 0;
-        for (List<Long> t : table.values()) {
-            // System.out.println(t.toString());
-            long maxValue = Long.MIN_VALUE;
-            for (Long i : t) {
-               maxValue = Math.max(maxValue, i);
+        // right[] to store indices of the next smaller element
+        for (int i = arr.length-1; i >= 0; i--) {
+            while (!st.empty() && arr[st.peek()] >= arr[i]) {
+                st.pop();
             }
-            res[count++] = maxValue;
+
+            if (!st.empty()) {
+                right[i] = st.peek();
+            }
+
+            st.push(i);
         }
 
+        // clean up stack
+        while (!st.empty()) {
+            st.pop();
+        }
+
+        // Now, you can observe that arr[i] (0<=i<n) is the smallest element
+        // in the range of next[i] - previous[i] - 1.
+        int len;
+        for (int i = 0; i < arr.length; i++) {
+            len = right[i] - left[i] - 1;
+            ans[len] = Math.max(ans[len], arr[i]);
+        }
+
+        // After this, we may have some values of res[i] which are 0.
+        // There is also an interesting observation that res[i] >= res[i+1].
+        // So we can fill the remaining values by using this condition.
+        for (int i = arr.length - 1; i >= 1; i--) {
+            ans[i] = Math.max(ans[i], ans[i+1]);
+        }
+
+        long[] res = new long[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            res[i] = ans[i + 1];
+        }
         return res;
     }
 
